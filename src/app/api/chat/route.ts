@@ -70,7 +70,7 @@ export async function POST(req: NextRequest, res: NextResponse) {
       result = await openAIRequest(prompt);
       console.log(result, 'result')
     }
-
+    console.log(result, 'result after OPENAI request')
     const metadata = {
       // get mimetype of this file
       contentType: mimetypeMapper[fileToStorage.type]
@@ -90,8 +90,10 @@ export async function POST(req: NextRequest, res: NextResponse) {
     // const fileContent = await getFileContent(storage, snapshot.metadata.fullPath);
     // console.log(fileContent, "fileContent");
     return NextResponse.json({ data: result.data });
-  } catch (err) {
-    console.log(err, "err");
+  } catch (err: any) {
+    console.log(err.message, 'message');
+    console.log(err.response?.data);
+    return NextResponse.json({ data: [] });
   }
 }
 /*
