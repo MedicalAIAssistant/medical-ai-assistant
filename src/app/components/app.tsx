@@ -7,6 +7,9 @@ type Message = {
   sender: string;
   message: string;
 };
+
+// test commit
+
 export default function Fetcher() {
   const [messages, setMessages] = useState<Array<Message>>([]);
   const [value, setValue] = useState<string>(
