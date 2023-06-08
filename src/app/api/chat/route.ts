@@ -1,6 +1,5 @@
 import { NextResponse, NextRequest } from "next/server";
 import { trackTimeWrapper } from "@/app/utils/track-time-wrapper";
-import { uploadFile } from "@/app/storage/firebase/utils";
 import {
   getQueryParamFromRequest,
   getFileFromRequest,
