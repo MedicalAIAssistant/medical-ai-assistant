@@ -1,19 +1,13 @@
 import { NextResponse, NextRequest } from "next/server";
-import { storage } from "@/app/storage/firebase";
-import {
-  ref,
-  uploadBytesResumable,
-} from "firebase/storage";
 import { openAIRequest } from "@/app/storage/openai";
+import { trackTimeWrapper } from "@/app/utils/track-time-wrapper";
+import { uploadFile } from "@/app/storage/firebase/utils";
+import { getQueryParamFromRequest, getFileFromRequest} from "@/app/utils/server/request.utils";
 
 export const config = {
   api: {
     bodyParser: false,
   },
-};
-
-const mimetypeMapper: Record<string, string> = {
-  ['text/plain']: '.txt'
 };
 
 const textToChunks = (
@@ -44,20 +38,14 @@ const textToChunks = (
   }
 
   return chunks;
-}
+};
+
 
 export async function POST(req: NextRequest, res: NextResponse) {
-  console.log("File uploading...");
-  const query = new URLSearchParams(req.url).values().next().value;
   try {
-    // Get file from request
-    const formData = await req.formData();
-    const files = formData.getAll("files") as File[];
-    const fileToStorage = files[0];
-
-    const filename = fileToStorage.name;
-    // create ref for that file
-    const fileRef = ref(storage, filename);
+    console.log("File uploading...");
+    const query = getQueryParamFromRequest(req);
+    const fileToStorage = await getFileFromRequest(req);
 
     const fileContent = await fileToStorage.text();
 
@@ -68,30 +56,17 @@ export async function POST(req: NextRequest, res: NextResponse) {
     for (const chunk of contents) {
       const prompt = chunk + "\n\n" + query;
       result = await openAIRequest(prompt);
-      console.log(result?.data, 'result')
+      console.log(result?.data, "result");
     }
 
-    const metadata = {
-      // get mimetype of this file
-      contentType: mimetypeMapper[fileToStorage.type]
-    };
-  
-    if(!metadata.contentType) {
-      throw new Error('No content type specified');
-    }
-
-    // pass ref and buffer
-    const snapshot = await uploadBytesResumable(
-      fileRef,
-      await fileToStorage.arrayBuffer(),
-      metadata
-    );
-
+    // Create separate endpoint to manage file upload
+    const snapshot = await trackTimeWrapper(() => uploadFile(fileToStorage), 'Uploading file to firebase');
     // const fileContent = await getFileContent(storage, snapshot.metadata.fullPath);
     // console.log(fileContent, "fileContent");
+
     return NextResponse.json({ data: result.data });
   } catch (err: any) {
-    console.log(err.message, 'message');
+    console.log(err.message, "message");
     console.log(err.response?.data);
     return NextResponse.json({ data: [] });
   }
@@ -104,7 +79,7 @@ export async function POST(req: NextRequest, res: NextResponse) {
 
 /**
  * General idea of asking question based on document
- * 
+ *
  * - upload pdf document from UI
  * - save pdf document on server
  * - parse pdf document to txt or plain text (if possible)

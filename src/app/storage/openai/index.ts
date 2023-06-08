@@ -7,7 +7,6 @@ const configuration = new Configuration({
 const openai = new OpenAIApi(configuration);
 
 export const openAIRequest = async (prompt: string) => {
-  console.log(process.env.OpenAIApiKey?.toLocaleUpperCase() + 'a', 'api key')
   return await openai.createCompletion({
     model: "text-davinci-003",
     prompt,
