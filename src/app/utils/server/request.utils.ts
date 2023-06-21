@@ -1,4 +1,3 @@
-
 import { NextRequest } from "next/server";
 
 // Get file from request
@@ -11,7 +10,8 @@ export const getFileFromRequest = async (req: NextRequest) => {
 };
 
 // Get query param
-// TODO should be easier way of doing this
-export const getQueryParamFromRequest = (req: NextRequest) => {
-    return new URLSearchParams(req.url).values().next().value;
+export const getQueryParam = (req: NextRequest, key: string): string => {
+  const { searchParams } = new URL(req.url);
+  const param = searchParams.get(key);
+  return param || "";
 };

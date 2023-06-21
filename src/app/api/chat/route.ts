@@ -1,7 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
 import { trackTimeWrapper } from "@/app/utils/track-time-wrapper";
 import {
-  getQueryParamFromRequest,
+  getQueryParam,
   getFileFromRequest,
 } from "@/app/utils/server/request.utils";
 import { textToChunks } from "@/app/service/text-chunks.service";
@@ -15,7 +15,7 @@ export const config = {
 
 export async function POST(req: NextRequest, res: NextResponse) {
   try {
-    const query = getQueryParamFromRequest(req);
+    const query = getQueryParam(req, "query");
     const fileToStorage = await getFileFromRequest(req);
 
     const fileContent = await fileToStorage.text();
