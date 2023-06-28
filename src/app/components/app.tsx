@@ -7,9 +7,14 @@ type Message = {
   sender: string;
   message: string;
 };
+const errorMessage = {
+  sender: "ai",
+  message:
+    "Упс... сталась якась помилка, спробуй будь ласка перефразувати питання.",
+};
 export default function Fetcher() {
   const [messages, setMessages] = useState<Array<Message>>([]);
-  const [value, setValue] = useState<string>("");
+  const [question, setQuestion] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [file, setFile] = useState(null);
 
@@ -18,12 +23,11 @@ export default function Fetcher() {
     formData.append("files", file!);
     setLoading(true);
     setMessages((prev) =>
-      value ? [...prev, { message: value, sender: "user" }] : prev
+      question ? [...prev, { message: question, sender: "user" }] : prev
     );
-    setValue("");
-    console.log(file, "file", formData, "onSearch");
+    setQuestion("");
 
-    fetch(`/api/chat?query=${value}`, {
+    fetch(`/api/chat?query=${question}`, {
       method: "POST",
       body: formData,
     })
@@ -40,6 +44,7 @@ export default function Fetcher() {
       })
       .catch(() => {
         setLoading(false);
+        setMessages((prev) => [...prev, errorMessage]);
       });
   };
 
@@ -59,13 +64,16 @@ export default function Fetcher() {
           {messages.map(({ message, sender }) => (
             <Box
               key={message}
-              width="50%"
+              width="45%"
               sx={{
+                marginTop: "5px",
                 color: sender === "user" ? "#B4B3B2" : "white",
                 textAlign: sender === "user" ? "end" : "start",
-                marginLeft: sender === "user" ? "50%" : "12px",
-                marginRight: sender === "ai" ? "50%" : "12px",
+                marginLeft: sender === "user" ? "54%" : "12px",
                 fontSize: "20px",
+                border: `1px solid ${sender === "user" ? "white" : "green"}`,
+                padding: "10px",
+                borderRadius: "20px",
               }}
             >
               {message}
@@ -76,8 +84,8 @@ export default function Fetcher() {
         {loading && <p>Loading...</p>}
       </Box>
       <SearchInput
-        value={value}
-        setValue={setValue}
+        value={question}
+        setValue={setQuestion}
         onSearch={onSearch}
         onClear={onClear}
         onUpload={setFile}

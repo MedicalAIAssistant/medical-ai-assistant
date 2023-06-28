@@ -18,7 +18,7 @@ export async function POST(req: NextRequest, res: NextResponse) {
     const contents = await getFileContentChunks(req);
 
     const result = await trackTimeWrapper(
-      () => prompt(contents, query),
+      () => prompt(query, contents),
       "Prompt OpenAI"
     );
 

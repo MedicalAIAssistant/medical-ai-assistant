@@ -2,8 +2,8 @@ import { openAIRequest } from "@/app/storage/openai";
 import { trackTimeWrapper } from "@/app/utils/track-time-wrapper";
 
 const promptOpenAIBasedOnContext = async (
-  contents: string[],
-  question: string
+  question: string,
+  contents: string[]
 ) => {
   let result;
 
@@ -27,9 +27,9 @@ const promptOpenAI = async (question: string) => {
   return result;
 };
 
-export const prompt = async (contents: string[], question: string) => {
+export const prompt = async (question: string, contents = []) => {
   if (contents.length) {
-    return await promptOpenAIBasedOnContext(contents, question);
+    return await promptOpenAIBasedOnContext(question, contents);
   } else {
     return await promptOpenAI(question);
   }
