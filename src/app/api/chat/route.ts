@@ -1,26 +1,31 @@
 import { NextResponse, NextRequest } from "next/server";
-import { trackTimeWrapper } from "@/app/utils/track-time-wrapper";
-import {
-  getQueryParam,
-  getFileContentChunks,
-} from "@/app/utils/server/request.utils";
-import { prompt } from "@/app/storage/openai/utils";
+import { getQueryParam } from "@/app/utils/server/request.utils";
+import { openAIRequest } from "@/app/storage/openai";
+import { StreamService } from "@/app/service/stream.service";
 
 export const config = {
   api: {
     bodyParser: false,
   },
+  runtime: "edge",
 };
 
-export async function POST(req: NextRequest, res: NextResponse) {
+export async function POST(req: NextRequest) {
   try {
     const query = getQueryParam(req, "query");
-    const contents = await getFileContentChunks(req);
 
-    const result = await trackTimeWrapper(
-      () => prompt(query, contents),
-      "Prompt OpenAI"
-    );
+    const openAIresponse = await openAIRequest(query);
+
+    const streamService = new StreamService();
+    const stream = streamService.createStream(openAIresponse);
+
+    return new Response(stream);
+    // parsing doc and asking based on doc
+    // const contents = await getFileContentChunks(req);
+    // const result = await trackTimeWrapper(
+    //   () => prompt(query, contents),
+    //   "Prompt OpenAI"
+    // );
 
     // Create separate endpoint to manage file upload
     // const snapshot = await trackTimeWrapper(
@@ -30,7 +35,7 @@ export async function POST(req: NextRequest, res: NextResponse) {
     // const fileContent = await getFileContent(storage, snapshot.metadata.fullPath);
     // console.log(fileContent, "fileContent");
 
-    return NextResponse.json({ data: result.data });
+    // return NextResponse.json({ data: result.data });
   } catch (err: any) {
     console.log(err.message, "message");
     console.log(err.response?.data);

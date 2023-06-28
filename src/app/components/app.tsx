@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { SearchInput } from "./search";
 import { Box } from "@mui/material";
 
@@ -14,38 +14,53 @@ const errorMessage = {
 };
 export default function Fetcher() {
   const [messages, setMessages] = useState<Array<Message>>([]);
+  const [isPending, startTransition] = useTransition();
   const [question, setQuestion] = useState<string>("");
-  const [loading, setLoading] = useState(false);
   const [file, setFile] = useState(null);
 
-  const onSearch = () => {
+  const onSearch = async () => {
     const formData = new FormData();
     formData.append("files", file!);
-    setLoading(true);
     setMessages((prev) =>
       question ? [...prev, { message: question, sender: "user" }] : prev
     );
-    setQuestion("");
 
-    fetch(`/api/chat?query=${question}`, {
-      method: "POST",
-      body: formData,
-    })
-      .then((response) => response.json())
-      .then(({ data }) => {
-        setLoading(false);
-        setMessages((prev) => {
-          const messages = (data?.choices || []).map(({ text }: any) => ({
-            sender: "ai",
-            message: text,
-          }));
-          return [...prev, ...messages];
-        });
-      })
-      .catch(() => {
-        setLoading(false);
-        setMessages((prev) => [...prev, errorMessage]);
+    try {
+      const response = await fetch(`/api/chat?query=${question}`, {
+        method: "POST",
+        body: formData,
       });
+
+      if (!response.ok) {
+        throw new Error(response.statusText);
+      }
+
+      // This data is a ReadableStream
+      const data = response.body;
+      if (!data) {
+        return;
+      }
+
+      const reader = data.getReader();
+      const decoder = new TextDecoder();
+      let done = false;
+      setMessages((prev) => [...prev, { sender: "ai", message: "" }]);
+
+      while (!done) {
+        const { value, done: doneReading } = await reader.read();
+        done = doneReading;
+        const chunkValue = decoder.decode(value);
+        startTransition(() => {
+          setMessages((prev) => {
+              const { message: lastMessage } = prev[prev.length - 1];
+              prev[prev.length - 1].message = lastMessage + chunkValue;
+              return prev;
+          });
+        });
+      }
+    } catch (e) {
+      setMessages((prev) => [...prev, errorMessage]);
+    }
   };
 
   const onClear = () => setMessages([]);
@@ -61,7 +76,7 @@ export default function Fetcher() {
         }}
       >
         <Box>
-          {messages.map(({ message, sender }) => (
+          {messages.map(({ message, sender }, index) => (
             <Box
               key={message}
               width="45%"
@@ -77,11 +92,11 @@ export default function Fetcher() {
               }}
             >
               {message}
+              {/* When streaming response add kinda loading ... */}
+              { index === messages.length - 1 && isPending && "..."}
             </Box>
           ))}
         </Box>
-
-        {loading && <p>Loading...</p>}
       </Box>
       <SearchInput
         value={question}

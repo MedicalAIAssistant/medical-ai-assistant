@@ -14,6 +14,7 @@ specifiers:
   encoding: ^0.1.13
   eslint: 8.38.0
   eslint-config-next: 13.3.0
+  eventsource-parser: ^1.0.0
   firebase: ^9.22.0
   formidable: v3
   material-icons: ^1.13.4
@@ -34,6 +35,7 @@ dependencies:
   '@types/react-dom': 18.0.11
   eslint: 8.38.0
   eslint-config-next: 13.3.0_voubu7prgxjfsfbgx5d4sqnwiy
+  eventsource-parser: 1.0.0
   firebase: 9.22.0_encoding@0.1.13
   formidable: 3.2.5
   material-icons: 1.13.4
@@ -2139,6 +2141,11 @@ packages:
     resolution: {integrity: sha512-kEcvvCBByWXGnZy6JUlgAp2gBIUjfCAV6P6TgT1/aaQKcmuAEC4OZTV1I4EWQLz2gxZw76atuVyvHhTxvi0Flw==}
     engines: {node: '>=0.4.x'}
     dev: true
+
+  /eventsource-parser/1.0.0:
+    resolution: {integrity: sha512-9jgfSCa3dmEme2ES3mPByGXfgZ87VbP97tng1G2nWwWx6bV2nYxm2AWCrbQjXToSe+yYlqaZNtxffR9IeQr95g==}
+    engines: {node: '>=14.18'}
+    dev: false
 
   /fast-deep-equal/3.1.3:
     resolution: {integrity: sha512-f3qQ9oQy9j2AhBe/H9VC91wLmKBCCU/gDOnKNAYG5hswO7BLKj09Hc5HYNz9cGI++xlpDCIgDaitVs03ATR84Q==}

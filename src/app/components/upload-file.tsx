@@ -4,7 +4,7 @@ const UploadFile = ({ onUpload }: any) => {
     onUpload(file);
   };
   return (
-    <input onChange={onChange} id="fileSelect" type="file" multiple={false} />
+    <input onChange={onChange} id="fileSelect" type="file" multiple={false} disabled={true} />
   );
 };
 

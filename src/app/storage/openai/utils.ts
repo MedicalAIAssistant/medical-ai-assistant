@@ -27,7 +27,7 @@ const promptOpenAI = async (question: string) => {
   return result;
 };
 
-export const prompt = async (question: string, contents = []) => {
+export const prompt = async (question: string, contents = [] as string[]) => {
   if (contents.length) {
     return await promptOpenAIBasedOnContext(question, contents);
   } else {
