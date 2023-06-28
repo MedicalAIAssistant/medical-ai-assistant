@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { SearchInput } from "./search";
-import { Box, Button } from "@mui/material";
+import { Box } from "@mui/material";
 
 type Message = {
   sender: string;
@@ -9,9 +9,7 @@ type Message = {
 };
 export default function Fetcher() {
   const [messages, setMessages] = useState<Array<Message>>([]);
-  const [value, setValue] = useState<string>(
-    "основуючись на даному тексті, як звати головного персонажа та скільки йому років?"
-  );
+  const [value, setValue] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [file, setFile] = useState(null);
 
@@ -45,9 +43,7 @@ export default function Fetcher() {
       });
   };
 
-  const onClear = () => {
-    setMessages([]);
-  };
+  const onClear = () => setMessages([]);
 
   return (
     <>
@@ -60,7 +56,7 @@ export default function Fetcher() {
         }}
       >
         <Box>
-          {(messages || []).map(({ message, sender }) => (
+          {messages.map(({ message, sender }) => (
             <Box
               key={message}
               width="50%"

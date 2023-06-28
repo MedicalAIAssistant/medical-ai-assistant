@@ -1,4 +1,4 @@
-import * as React from "react";
+import { useCallback } from "react";
 import Paper from "@mui/material/Paper";
 import InputBase from "@mui/material/InputBase";
 import IconButton from "@mui/material/IconButton";
@@ -6,7 +6,22 @@ import Button from "@mui/material/Button";
 import SearchIcon from "@mui/icons-material/Search";
 import UploadFile from "./upload-file";
 
-export const SearchInput = ({ value, setValue, onSearch, onClear, onUpload }: any) => {
+export const SearchInput = ({
+  value,
+  setValue,
+  onSearch,
+  onClear,
+  onUpload,
+}: any) => {
+  const onEnterKey = useCallback(
+    (event: any) => {
+      if (event.key === "Enter") {
+        onSearch();
+      }
+    },
+    [onSearch]
+  );
+
   return (
     <Paper
       sx={{
@@ -20,7 +35,8 @@ export const SearchInput = ({ value, setValue, onSearch, onClear, onUpload }: an
       <Button onClick={onClear}>Очистити повідомлення</Button>
       <InputBase
         sx={{ ml: 1, flex: 1 }}
-        placeholder="Які у вас запитання?"
+        placeholder="Які у вас питання?"
+        onKeyDown={onEnterKey}
         value={value}
         onChange={(e: any) => setValue(e?.target?.value)}
       />
@@ -32,10 +48,7 @@ export const SearchInput = ({ value, setValue, onSearch, onClear, onUpload }: an
       >
         <SearchIcon />
       </IconButton>
-      <IconButton
-        sx={{ p: "10px" }}
-        aria-label="upload"
-      >
+      <IconButton sx={{ p: "10px" }} aria-label="upload">
         <UploadFile onUpload={onUpload} />
       </IconButton>
     </Paper>

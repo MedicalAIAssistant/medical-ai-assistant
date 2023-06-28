@@ -2,10 +2,9 @@ import { NextResponse, NextRequest } from "next/server";
 import { trackTimeWrapper } from "@/app/utils/track-time-wrapper";
 import {
   getQueryParam,
-  getFileFromRequest,
+  getFileContentChunks,
 } from "@/app/utils/server/request.utils";
-import { textToChunks } from "@/app/service/text-chunks.service";
-import { promptOpenAI } from "@/app/storage/openai/utils";
+import { prompt } from "@/app/storage/openai/utils";
 
 export const config = {
   api: {
@@ -16,14 +15,10 @@ export const config = {
 export async function POST(req: NextRequest, res: NextResponse) {
   try {
     const query = getQueryParam(req, "query");
-    const fileToStorage = await getFileFromRequest(req);
-
-    const fileContent = await fileToStorage.text();
-
-    const contents = textToChunks([fileContent]);
+    const contents = await getFileContentChunks(req);
 
     const result = await trackTimeWrapper(
-      () => promptOpenAI(contents, query),
+      () => prompt(contents, query),
       "Prompt OpenAI"
     );
 
