@@ -12,7 +12,7 @@ const errorMessage = {
   message:
     "Упс... сталась якась помилка, спробуй будь ласка перефразувати питання.",
 };
-export default function Fetcher() {
+export default function Home() {
   const [messages, setMessages] = useState<Array<Message>>([]);
   const [isPending, startTransition] = useTransition();
   const [question, setQuestion] = useState<string>("");

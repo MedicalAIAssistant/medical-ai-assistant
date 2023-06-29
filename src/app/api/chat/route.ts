@@ -10,16 +10,27 @@ export const config = {
   runtime: "edge",
 };
 
+const CorsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Content-Type": "text/event-stream;charset=utf-8",
+  "Cache-Control": "no-cache, no-transform",
+  "X-Accel-Buffering": "no",
+}
+
 export async function POST(req: NextRequest) {
   try {
     const query = getQueryParam(req, "query");
 
     const openAIresponse = await openAIRequest(query);
 
-    const streamService = new StreamService();
+    const streamService = new StreamService()
     const stream = streamService.createStream(openAIresponse);
 
-    return new Response(stream);
+    return new Response(stream.body, {
+      headers: {
+        ...CorsHeaders,
+      },
+    })
     // parsing doc and asking based on doc
     // const contents = await getFileContentChunks(req);
     // const result = await trackTimeWrapper(

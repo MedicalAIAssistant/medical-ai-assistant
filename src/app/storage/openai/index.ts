@@ -1,27 +1,10 @@
-const { Configuration, OpenAIApi } = require("openai");
+import { Configuration, OpenAIApi } from "openai-edge";
 
 const configuration = new Configuration({
   apiKey: process.env.OpenAIApiKey,
 });
 
 const openai = new OpenAIApi(configuration);
-
-/**
- * @deprecated We can not use createCompletion because it is used Axios with XHR
- * under the hood and can't be run on edge with streaming because worker used fetch. 
- * To fix it we should use adapter https://github.com/openai/openai-node/issues/30
- */
-const openAIRequestOld = async (prompt: string) => {
-  return await openai.createCompletion({
-    model: "text-davinci-003",
-    prompt,
-    temperature: 0,
-    max_tokens: 1024,
-    top_p: 1.0,
-    frequency_penalty: 0.0,
-    presence_penalty: 0.0,
-  });
-};
 
 const openAIStreamPayload = {
   model: "gpt-3.5-turbo",
@@ -34,7 +17,21 @@ const openAIStreamPayload = {
   n: 1,
 };
 
+// https://nextjs.org/docs/app/building-your-application/routing/router-handlers#streaming
+// https://github.com/dan-kwiat/openai-edge#edge-route-handler-examples
 export const openAIRequest = async (prompt: string) => {
+  return await openai.createChatCompletion({
+    ...openAIStreamPayload,
+    messages: [{ role: "user", content: prompt }],
+  });
+};
+
+/**
+ * @deprecated We can call OpenAI directly via fetch, but better to use openai-edge api
+ * Notice: we can't use just "openai" as it doesn't allow streaming
+ * https://github.com/openai/openai-node/issues/30
+ */
+export const openAIRequestOld = async (prompt: string) => {
   return await fetch("https://api.openai.com/v1/chat/completions", {
     headers: {
       "Content-Type": "application/json",

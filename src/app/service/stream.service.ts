@@ -3,9 +3,13 @@ import {
   ParsedEvent,
   ReconnectInterval,
 } from "eventsource-parser";
+import { OpenAIStream, StreamingTextResponse } from "ai";
 
 // https://levelup.gitconnected.com/how-to-stream-real-time-openai-api-responses-next-js-13-2-gpt-3-5-turbo-and-edge-functions-378fea4dadbd
-export class StreamService {
+/**
+ * @deprecated We no longer use it as we have OpenAIStream from "ai"
+ */
+export class StreamServiceOld {
   createStream = (res: Response) => {
     const encoder = new TextEncoder();
     const decoder = new TextDecoder();
@@ -49,4 +53,11 @@ export class StreamService {
 
     return stream;
   };
+}
+
+export class StreamService {
+  createStream = (response: Response) => {
+    const stream = OpenAIStream(response);
+    return new StreamingTextResponse(stream);
+  }
 }
